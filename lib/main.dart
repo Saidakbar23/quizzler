@@ -1,5 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:quizzler/quiz_brain.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+
+QuizBrain quizBrain = QuizBrain();
 
 void main() {
   runApp(const Quizzler());
@@ -34,13 +37,31 @@ class QuizPage extends StatefulWidget {
 
 class _QuizPageState extends State<QuizPage> {
   List<Widget> scoreKeeper = [];
-  List<String> questions = [
-    "You can lead a cow down the stairs, but not up the stairs.",
-    "Approximately, one quarter of human bones are in feet.",
-    "A slug's blood is green",
-  ];
 
-  int questionNumber = 0;
+  void checkAnswer(bool userPickedAnswer) {
+    bool rightAnswer = quizBrain.getQuestionAnswer();
+
+    setState(() {
+      if (quizBrain.isFinished()) {
+        Alert(context: context, title: "Quizzler", desc: "Game is over").show();
+        quizBrain.reset();
+        scoreKeeper.clear();
+      } else {
+        if (rightAnswer == userPickedAnswer) {
+          scoreKeeper.add(const Icon(
+            Icons.check,
+            color: Colors.green,
+          ));
+        } else {
+          scoreKeeper.add(const Icon(
+            Icons.close,
+            color: Colors.red,
+          ));
+        }
+        quizBrain.nextQuestionNumber();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,9 +74,9 @@ class _QuizPageState extends State<QuizPage> {
             flex: 5,
             child: Center(
               child: Text(
-                questions[questionNumber],
+                quizBrain.getQuestionText(),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 25.0,
                 ),
@@ -71,11 +92,9 @@ class _QuizPageState extends State<QuizPage> {
                   backgroundColor: Colors.green,
                 ),
                 onPressed: () {
-                  setState(() {
-                    questionNumber++;
-                  });
+                  checkAnswer(true);
                 },
-                child: Text(
+                child: const Text(
                   "True",
                   style: TextStyle(
                     color: Colors.white,
@@ -93,11 +112,9 @@ class _QuizPageState extends State<QuizPage> {
                   backgroundColor: Colors.red,
                 ),
                 onPressed: () {
-                  setState(() {
-                    questionNumber++;
-                  });
+                  checkAnswer(false);
                 },
-                child: Text(
+                child: const Text(
                   "False",
                   style: TextStyle(
                     color: Colors.white,
